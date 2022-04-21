@@ -1,5 +1,5 @@
 from battery.Cycle import Cycle
-from main import batteries_data
+import global_vars
 
 
 class Battery:
@@ -7,7 +7,7 @@ class Battery:
     def __init__(self, barcode):
         self.barcode = barcode
         self.cur_cycle = 0
-        self.cycles = [Cycle(barcode, key) for key in batteries_data[barcode]['cycles'].keys()]
+        self.cycles = [Cycle(barcode, key) for key in global_vars.batteries_data[barcode]['cycles'].keys()]
 
     def get_cycle(self, cycle_id=None):
 

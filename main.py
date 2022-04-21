@@ -1,19 +1,15 @@
 from Lib import argparse
-
-import reader
-from battery.Battery import Battery
-
-
-global batteries_data
+import global_vars
+from battery import Battery
 
 
 if __name__ == "__main__":
 
-    batteries_data = reader.all_batteries()
+    global_vars.init()
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-b', '--barcode', type=str, default=batteries_data.keys()[0],
+        '-b', '--barcode', type=str, default=global_vars.batteries_data.keys()[0],
         help="",
     )
     parser.add_argument('-c', '--cycle', type=int, help="", required=True)
