@@ -1,6 +1,7 @@
 import argparse
 import global_vars
 import reader
+import json
 from battery import Battery
 
 
@@ -20,8 +21,10 @@ if __name__ == "__main__":
     global_vars.batteries_data = reader.load_battery(batch_1, args.barcode)
     # print(global_vars.batteries_data.keys())
     battery = Battery(args.barcode)
-    battery.get_cycle()
-    battery.reset()
-    battery.next_cycle()
-    battery.roll_back(50)
+
+    json.loads()
+    # battery.get_cycle()
+    # battery.reset()
+    # battery.next_cycle()
+    # battery.roll_back(50)
 
