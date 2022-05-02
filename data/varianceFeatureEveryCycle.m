@@ -6,6 +6,7 @@ function varianceFeatureEveryCycle(whole_batch)
 % addpath('D:\Matlab\toolbox\jsonlab-master');
 % three batches have 140 battery in total.
 battery_num = 100;
+start = 1;
 
 fid = fopen('data1.json', 'w+');
 % whole_battery: the dataset of combining the three batches.
@@ -35,13 +36,13 @@ fid = fopen('data1.json', 'w+');
 
 log_vars = [];
 cycle_lifes = [];
-for i = 1:battery_num
+for i = start:battery_num
     Q_2 = whole_batch(i).cycles(2).Qdlin;
     cycle_life = whole_batch(i).cycle_life - 1;
     if isnan(cycle_life)
         continue;
     end
-    for j = 3:cycle_life
+    for j = 3:cycle_life - 1
         
         Q_j = whole_batch(i).cycles(j).Qdlin;
         delta_Q = Q_j - Q_2;
