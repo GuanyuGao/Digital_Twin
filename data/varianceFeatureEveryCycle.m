@@ -8,7 +8,7 @@ function [log_vars, cycle_lifes] = varianceFeatureEveryCycle(whole_batch)
 battery_num = 100;
 start = 1;
 
-% fid = fopen('data1.json', 'w+');
+fid = fopen('data1.json', 'w+');
 % whole_battery: the dataset of combining the three batches.
 
 % get the value of Qdlin in first cycle of every battery, 
@@ -42,7 +42,7 @@ for i = start:battery_num
     if isnan(cycle_life)
         continue;
     end
-    for j = 3:cycle_life - 1
+    for j = 3:cycle_life - 100
         
         Q_j = whole_batch(i).cycles(j).Qdlin;
         delta_Q = Q_j - Q_2;
@@ -57,11 +57,11 @@ end
         
 json_log_var = jsonencode(log_vars);
 json_cycle_life = jsonencode(cycle_lifes);
-% fprintf(fid, '%s', json_log_var);
+fprintf(fid, '%s', json_log_var);
 
-% fprintf(fid,'\r\n');
-% fprintf(fid, '%s', json_cycle_life)
+fprintf(fid,'\r\n');
+fprintf(fid, '%s', json_cycle_life)
 
 
-%fclose(fid);
+fclose(fid);
 

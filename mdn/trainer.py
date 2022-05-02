@@ -18,7 +18,7 @@ def plot_data(x, y):
 if __name__ == '__main__':
 
     argparser = ArgumentParser()
-    argparser.add_argument("--n-iterations", type=int, default=1000)
+    argparser.add_argument("--n-iterations", type=int, default=50000)
     args = argparser.parse_args()
 
     x, y = load_data()
@@ -43,7 +43,7 @@ if __name__ == '__main__':
         "test_y": test_y[:, 0].numpy().tolist(),
         "predictions": predictions[:, 0].numpy().tolist()
     }
-    with open('prediction.json', 'w') as f:
+    with open('../data/prediction.json', 'w') as f:
         json.dump(json_type, f)
 
     accuracy = torch.sum(abs(predictions[:, 0] - test_y[:, 0]) / test_y[:, 0]) / test_y.shape[0] * 100
