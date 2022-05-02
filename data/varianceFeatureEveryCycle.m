@@ -1,14 +1,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variance model features %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-function varianceFeatureEveryCycle(whole_batch)
+function [log_vars, cycle_lifes] = varianceFeatureEveryCycle(whole_batch)
 
 % addpath('D:\Matlab\toolbox\jsonlab-master');
 % three batches have 140 battery in total.
 battery_num = 100;
 start = 1;
 
-fid = fopen('data1.json', 'w+');
+% fid = fopen('data1.json', 'w+');
 % whole_battery: the dataset of combining the three batches.
 
 % get the value of Qdlin in first cycle of every battery, 
@@ -57,11 +57,11 @@ end
         
 json_log_var = jsonencode(log_vars);
 json_cycle_life = jsonencode(cycle_lifes);
-fprintf(fid, '%s', json_log_var);
+% fprintf(fid, '%s', json_log_var);
 
-fprintf(fid,'\r\n');
-fprintf(fid, '%s', json_cycle_life)
+% fprintf(fid,'\r\n');
+% fprintf(fid, '%s', json_cycle_life)
 
 
-fclose(fid);
+%fclose(fid);
 
