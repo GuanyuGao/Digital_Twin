@@ -30,6 +30,7 @@ if __name__ == '__main__':
 
     model = MixtureDensityNetwork(1, 1, n_components=2)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
+
     for i in range(args.n_iterations):
         optimizer.zero_grad()
         loss = model.loss(train_x, train_y).mean()
@@ -42,7 +43,12 @@ if __name__ == '__main__':
     predictions = model.sample(test_x)
 
     error_percent = abs(predictions[:, 0] - test_y[:, 0]) / test_y[:, 0]
+    # draw error distribution picture
     error_distribution(error_percent.tolist())
+
+    # get mean error
+    accuracy = torch.sum(error_percent) / test_y.shape[0] * 100
+    print(accuracy)
 
     json_type = {
         "test_x": test_x[:, 0].numpy().tolist(),
@@ -51,9 +57,6 @@ if __name__ == '__main__':
     }
     with open('../data/prediction.json', 'w') as f:
         json.dump(json_type, f)
-
-    accuracy = torch.sum(error_percent) / test_y.shape[0] * 100
-    print(accuracy)
     # plt.figure(figsize=(8, 3))
     #
     # plt.subplot(1, 2, 1)
