@@ -5,7 +5,7 @@ function [log_vars, cycle_lifes] = varianceFeatureEveryCycle(whole_batch)
 
 % addpath('D:\Matlab\toolbox\jsonlab-master');
 % three batches have 140 battery in total.
-battery_num = 100;
+battery_num = 1;
 start = 1;
 
 fid = fopen('data1.json', 'w+');

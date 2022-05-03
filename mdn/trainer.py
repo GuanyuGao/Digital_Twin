@@ -3,6 +3,8 @@ import json
 from torch import optim
 from argparse import ArgumentParser
 import matplotlib.pyplot as plt
+
+from data.ErrorDistribution import error_distribution
 from data.load_data import load_data, get_set
 from mdn.models import MixtureDensityNetwork
 from loguru import logger
@@ -18,7 +20,7 @@ def plot_data(x, y):
 if __name__ == '__main__':
 
     argparser = ArgumentParser()
-    argparser.add_argument("--n-iterations", type=int, default=50000)
+    argparser.add_argument("--n-iterations", type=int, default=100000)
     args = argparser.parse_args()
 
     x, y = load_data()
@@ -38,6 +40,10 @@ if __name__ == '__main__':
             logger.info(f"Iter: {i}\t" + f"Loss: {loss.data:.2f}")
 
     predictions = model.sample(test_x)
+
+    error_percent = abs(predictions[:, 0] - test_y[:, 0]) / test_y[:, 0]
+    error_distribution(error_percent.tolist())
+
     json_type = {
         "test_x": test_x[:, 0].numpy().tolist(),
         "test_y": test_y[:, 0].numpy().tolist(),
@@ -46,7 +52,7 @@ if __name__ == '__main__':
     with open('../data/prediction.json', 'w') as f:
         json.dump(json_type, f)
 
-    accuracy = torch.sum(abs(predictions[:, 0] - test_y[:, 0]) / test_y[:, 0]) / test_y.shape[0] * 100
+    accuracy = torch.sum(error_percent) / test_y.shape[0] * 100
     print(accuracy)
     # plt.figure(figsize=(8, 3))
     #
