@@ -3,65 +3,124 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [log_vars, cycle_lifes] = varianceFeatureEveryCycle(whole_batch)
 
-% addpath('D:\Matlab\toolbox\jsonlab-master');
-% three batches have 140 battery in total.
-battery_num = 1;
-start = 1;
-
-fid = fopen('data1.json', 'w+');
-% whole_battery: the dataset of combining the three batches.
-
-% get the value of Qdlin in first cycle of every battery, 
-% jion them and get a 1000 * 140 matrix 
-% get [cycle_life log_var] couple
-% for i = 1:battery_num
-%     
-%     % set the second cycle as the standard value
-%     Q_2 = whole_batch(i).cycles(2).Qdlin; 
-%     cycle_life = whole_batch(i).cycle_life - 1;
-%     
-%     for j = 3:cycle_life
-%         Q_j = whole_batch(i).cycles(j).Qdlin;
-%         
-%         delta_Q = Q_j - Q_2;
-%         var = abs(sum((delta_Q - mean(delta_Q)).^2)/1000);
-%         log_var = log10(var);
-%         
-%         data = jsonencode({[j;log_var]});
-%         fprintf(fid, '%s',data);
-%     end
-% end
+%     fid = fopen('ALLdata.json', 'w+');
 % 
-% fclose(fid);
+%     log_vars = [];
+%     log_miniums = [];
+%     log_skewnesses = [];
+%     log_kurtosises = [];
+%     cycle_lifes = [];
+% 
+%     % get the battery info specified by battery id 
+%     battery_id = 1;
+%     % set the second cycle of the battery as the benchmark
+%     Q_2 = batch(battery_id).cycles(2).Qdlin;
+%     cycle_life = batch(battery_id).cycle_life - 1;
+%     % calculate the some features by every cycles
+%     for j = 3:cycle_life
+% 
+%             Q_j = batch(battery_id).cycles(j).Qdlin;
+%             delta_Q = Q_j - Q_2;
+%             var = abs(sum((delta_Q - mean(delta_Q)).^2) / 1000);
+%             log_var = log10(var');
+% 
+%             % Minimum
+%             minium = abs(min(delta_Q));
+%             log_minium = log10(minium');
+% 
+%             % Skewness
+%             numerator_s = sum((delta_Q-mean(delta_Q)).^3) / 1000;
+%             denominator_s = sqrt(sum((delta_Q-mean(delta_Q)).^2)).^3;
+%             skewness = abs(numerator_s./denominator_s);
+%             log_skewness = log10(skewness');
+% 
+%             % Kurtosis
+%             numerator_k = sum((delta_Q-mean(delta_Q)).^4) / 1000;
+%             denominator_k = (sum((delta_Q-mean(delta_Q)).^2) / 1000).^2;
+%             kurtosis = abs(numerator_k./denominator_k);
+%             log_kurtosis = log10(kurtosis');
+% 
+%             log_vars = [log_vars log_var];
+%             log_miniums = [log_miniums, log_minium];
+%             log_skewnesses = [log_skewnesses, log_skewness];
+%             log_kurtosises = [log_kurtosises, log_kurtosis];
+%             cycle_lifes = [cycle_lifes cycle_life - j];
+%     end
+%     
+%     dict = struct(...
+%         'log_vars', log_vars,... 
+%         'log_miniums', log_miniums,...
+%         'log_skewnesses', log_skewnesses,... 
+%         'log_kurtosises', log_kurtosises,...
+%         'cycle_lifes', cycle_lifes...
+%         );
+%     
+%     json_dict = jsonencode(dict);
+%     fprintf(fid, '%s', json_dict);
+% 
+%     fclose(fid);
 
-log_vars = [];
-cycle_lifes = [];
-for i = start:battery_num
-    Q_2 = whole_batch(i).cycles(2).Qdlin;
-    cycle_life = whole_batch(i).cycle_life - 1;
-    if isnan(cycle_life)
-        continue;
-    end
-    for j = 3:cycle_life - 100
+    fid = fopen('ALLdata.json', 'w+');
+    battery_num = 140;
+    start = 1;
+    log_vars = [];
+    log_miniums = [];
+    log_skewnesses = [];
+    log_kurtosises = [];
+    cycle_lifes = [];
+    for i = start:battery_num
+        Q_2 = whole_batch(i).cycles(2).Qdlin;
+        cycle_life = length(whole_batch(i).cycles);
+        if isnan(cycle_life)
+            continue;
+        end
+        for j = 3:cycle_life - 1
+
+            Q_j = whole_batch(i).cycles(j).Qdlin;
+            delta_Q = Q_j - Q_2;
+            var = abs(sum((delta_Q - mean(delta_Q)).^2) / 1000);
+            log_var = log10(var);
+
+            % Minimum
+            minium = abs(min(delta_Q));
+            log_minium = log10(minium');
+
+            % Skewness
+            numerator_s = sum((delta_Q-mean(delta_Q)).^3) / 1000;
+            denominator_s = sqrt(sum((delta_Q-mean(delta_Q)).^2)).^3;
+            skewness = abs(numerator_s./denominator_s);
+            log_skewness = log10(skewness');
+
+            % Kurtosis
+            numerator_k = sum((delta_Q-mean(delta_Q)).^4) / 1000;
+            denominator_k = (sum((delta_Q-mean(delta_Q)).^2) / 1000).^2;
+            kurtosis = abs(numerator_k./denominator_k);
+            log_kurtosis = log10(kurtosis');
         
-        Q_j = whole_batch(i).cycles(j).Qdlin;
-        delta_Q = Q_j - Q_2;
-        var = abs(sum((delta_Q - mean(delta_Q)).^2)/1000);
-        log_var = log10(var);
-        
-        log_vars = [log_vars log_var];
-        cycle_lifes = [cycle_lifes cycle_life - j];
+            log_vars = [log_vars log_var];
+            log_miniums = [log_miniums, log_minium];
+            log_skewnesses = [log_skewnesses, log_skewness];
+            log_kurtosises = [log_kurtosises, log_kurtosis];
+            cycle_lifes = [cycle_lifes cycle_life - j];
+        end
+
     end
     
-end
-        
-json_log_var = jsonencode(log_vars);
-json_cycle_life = jsonencode(cycle_lifes);
-fprintf(fid, '%s', json_log_var);
+    dict = struct(...
+        'log_vars', log_vars,... 
+        'log_miniums', log_miniums,...
+        'log_skewnesses', log_skewnesses,... 
+        'log_kurtosises', log_kurtosises,...
+        'cycle_lifes', cycle_lifes...
+        );
+    
+    json_dict = jsonencode(dict);
+    fprintf(fid, '%s', json_dict);
 
-fprintf(fid,'\r\n');
-fprintf(fid, '%s', json_cycle_life)
+    fclose(fid);
+    
+    
+    
 
-
-fclose(fid);
+ 
 
