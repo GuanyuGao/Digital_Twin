@@ -20,7 +20,9 @@ def plot_data(x, y):
 if __name__ == '__main__':
 
     argparser = ArgumentParser()
-    argparser.add_argument("--n-iterations", type=int, default=50000)
+    argparser.add_argument("--n-iterations", type=int, default=30000)
+    argparser.add_argument("--hidden_dim", type=int, default=64)
+
     args = argparser.parse_args()
 
     x, y = load_data()
@@ -28,7 +30,7 @@ if __name__ == '__main__':
     train_x, train_y = get_set(x, y, "train")
     test_x, test_y = get_set(x, y, "test")
 
-    model = MixtureDensityNetwork(4, 1, n_components=3)
+    model = MixtureDensityNetwork(4, 1, args.hidden_dim, n_components=3)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
 
     for i in range(args.n_iterations):

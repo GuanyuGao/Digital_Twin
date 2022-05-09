@@ -16,11 +16,10 @@ class MixtureDensityNetwork(nn.Module):
     dim_out: int; dimensionality of the response variable
     n_components: int; number of components in the mixture model
     """
-    def __init__(self, dim_in, dim_out, n_components):
+    def __init__(self, dim_in, dim_out, hidden_dim=None, n_components=None):
         super().__init__()
-        self.pi_network = CategoricalNetwork(dim_in, n_components)
-        self.normal_network = MixtureDiagNormalNetwork(dim_in, dim_out,
-                                                       n_components)
+        self.pi_network = CategoricalNetwork(dim_in, n_components, hidden_dim)
+        self.normal_network = MixtureDiagNormalNetwork(dim_in, dim_out, n_components, hidden_dim)
 
     def forward(self, x):
         return self.pi_network(x), self.normal_network(x)
