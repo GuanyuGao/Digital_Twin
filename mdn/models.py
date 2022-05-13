@@ -74,6 +74,8 @@ class CategoricalNetwork(nn.Module):
         self.network = nn.Sequential(
             nn.Linear(in_dim, hidden_dim),
             nn.ELU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ELU(),
             nn.Linear(hidden_dim, out_dim)
         )
 
