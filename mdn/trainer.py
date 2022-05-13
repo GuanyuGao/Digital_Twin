@@ -1,3 +1,5 @@
+import math
+
 import torch
 import json
 from torch import optim
@@ -29,36 +31,65 @@ if __name__ == '__main__':
 
     train_x, train_y = get_set(x, y, "train")
     test_x, test_y = get_set(x, y, "test")
-
+    print(train_x)
+    print("---------------")
+    print(train_y)
     model = MixtureDensityNetwork(4, 1, args.hidden_dim, n_components=3)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
 
     for i in range(args.n_iterations):
         optimizer.zero_grad()
-        loss = model.loss(train_x, train_y).mean()
+        loss = model.loss(x, y).mean()
         loss.backward()
         optimizer.step()
 
         if i % 100 == 0:
             logger.info(f"Iter: {i}\t" + f"Loss: {loss.data:.2f}")
 
+    # torch.save(model.state_dict(), 'model.pt')
+
+    pi, normal = model(x)
+
+    for i in pi.sample():
+        print(i)
+    mean = normal.mean
+    stddev = normal.stddev
+
+    print(mean)
+    print(stddev)
+    #
+    # probabilities = []
+    # for i in range(y.shape[0]):
+    #     probability = (1 / (math.sqrt(2 * math.pi) * stddev[i][0][0])) * math.exp(-(y[i][0] - mean[i][0][0]) * (y[i][0] - mean[i][0][0]) / (2 * stddev[i][0][0] * stddev[i][0][0]))
+    #     probabilities.append(probability.item() * 100)
+    # print(sum(probabilities))
+
+    # plt.figure(figsize=(8, 3))
+    # plt.plot(y[:, 0].numpy(), probabilities[:])
+    # plt.show()
+    # print(normal.mean())
+    # print(normal.stddev())
     predictions = model.sample(test_x)
+    # print(predictions)
+    # print(test_y)
+    # print(predictions[:, 0].tolist())
+    # print(test_y[:, 0].tolist())
 
     error_percent = abs(predictions[:, 0] - test_y[:, 0]) / test_y[:, 0]
     # draw error distribution picture
     error_distribution(error_percent.tolist())
 
     # get mean error
-    accuracy = torch.sum(error_percent) / test_y.shape[0] * 100
+    accuracy = torch.sum(error_percent) / train_y.shape[0] * 100
     print(accuracy)
 
-    json_type = {
-        "test_x": test_x[:, 0].numpy().tolist(),
-        "test_y": test_y[:, 0].numpy().tolist(),
-        "predictions": predictions[:, 0].numpy().tolist()
-    }
-    with open('../data/prediction.json', 'w') as f:
-        json.dump(json_type, f)
+    # json_type = {
+    #     "test_x": test_x[:, 0].numpy().tolist(),
+    #     "test_y": test_y[:, 0].numpy().tolist(),
+    #     "predictions": predictions[:, 0].numpy().tolist()
+    # }
+    # with open('../data/prediction.json', 'w') as f:
+    #     json.dump(json_type, f)
     # plt.figure(figsize=(8, 3))
     #
     # plt.subplot(1, 2, 1)
