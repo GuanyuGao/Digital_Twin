@@ -49,6 +49,8 @@ class MixtureDiagNormalNetwork(nn.Module):
         self.network = nn.Sequential(
             nn.Linear(in_dim, hidden_dim),
             nn.ELU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ELU(),
             nn.Linear(hidden_dim, 2 * out_dim * n_components),
         )
 
