@@ -48,9 +48,7 @@ class MixtureDiagNormalNetwork(nn.Module):
             hidden_dim = in_dim
         self.network = nn.Sequential(
             nn.Linear(in_dim, hidden_dim),
-            nn.ELU(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.ELU(),
+            nn.Softmax(),
             nn.Linear(hidden_dim, 2 * out_dim * n_components),
         )
 
@@ -73,9 +71,7 @@ class CategoricalNetwork(nn.Module):
             hidden_dim = in_dim
         self.network = nn.Sequential(
             nn.Linear(in_dim, hidden_dim),
-            nn.ELU(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.ELU(),
+            nn.Softmax(),
             nn.Linear(hidden_dim, out_dim)
         )
 

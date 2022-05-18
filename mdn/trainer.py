@@ -22,19 +22,18 @@ def plot_data(x, y):
 if __name__ == '__main__':
 
     argparser = ArgumentParser()
-    argparser.add_argument("--n-iterations", type=int, default=30000)
+    argparser.add_argument("--n-iterations", type=int, default=10000)
     argparser.add_argument("--hidden_dim", type=int, default=64)
 
     args = argparser.parse_args()
 
     x, y = load_data()
+    print(x.shape)
 
     train_x, train_y = get_set(x, y, "train")
     test_x, test_y = get_set(x, y, "test")
-    print(train_x)
-    print("---------------")
-    print(train_y)
-    model = MixtureDensityNetwork(4, 1, args.hidden_dim, n_components=3)
+
+    model = MixtureDensityNetwork(4, 1, args.hidden_dim, n_components=5)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
 
     for i in range(args.n_iterations):
@@ -46,23 +45,12 @@ if __name__ == '__main__':
         if i % 100 == 0:
             logger.info(f"Iter: {i}\t" + f"Loss: {loss.data:.2f}")
 
-    # torch.save(model.state_dict(), 'model.pt')
+    torch.save(model.state_dict(), '../data/model100.pt')
 
     pi, normal = model(x)
-
-    for i in pi.sample():
-        print(i)
+    print(pi.sample())
     mean = normal.mean
     stddev = normal.stddev
-
-    print(mean)
-    print(stddev)
-    #
-    # probabilities = []
-    # for i in range(y.shape[0]):
-    #     probability = (1 / (math.sqrt(2 * math.pi) * stddev[i][0][0])) * math.exp(-(y[i][0] - mean[i][0][0]) * (y[i][0] - mean[i][0][0]) / (2 * stddev[i][0][0] * stddev[i][0][0]))
-    #     probabilities.append(probability.item() * 100)
-    # print(sum(probabilities))
 
     # plt.figure(figsize=(8, 3))
     # plt.plot(y[:, 0].numpy(), probabilities[:])
@@ -70,10 +58,6 @@ if __name__ == '__main__':
     # print(normal.mean())
     # print(normal.stddev())
     predictions = model.sample(test_x)
-    # print(predictions)
-    # print(test_y)
-    # print(predictions[:, 0].tolist())
-    # print(test_y[:, 0].tolist())
 
     error_percent = abs(predictions[:, 0] - test_y[:, 0]) / test_y[:, 0]
     # draw error distribution picture
