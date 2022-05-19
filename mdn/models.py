@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.distributions import Normal, OneHotCategorical
+from torch.distributions import Normal, OneHotCategorical, Categorical
 
 
 class MixtureDensityNetwork(nn.Module):
@@ -22,7 +22,8 @@ class MixtureDensityNetwork(nn.Module):
         self.normal_network = MixtureDiagNormalNetwork(dim_in, dim_out, n_components, hidden_dim)
 
     def forward(self, x):
-        return self.pi_network(x), self.normal_network(x)
+        logits, pi = self.pi_network(x)
+        return logits, pi, self.normal_network(x)
 
     def loss(self, x, y):
         pi, normal = self.forward(x)
@@ -48,7 +49,7 @@ class MixtureDiagNormalNetwork(nn.Module):
             hidden_dim = in_dim
         self.network = nn.Sequential(
             nn.Linear(in_dim, hidden_dim),
-            nn.Softmax(),
+            nn.ReLU(),
             nn.Linear(hidden_dim, 2 * out_dim * n_components),
         )
 
@@ -71,8 +72,8 @@ class CategoricalNetwork(nn.Module):
             hidden_dim = in_dim
         self.network = nn.Sequential(
             nn.Linear(in_dim, hidden_dim),
-            nn.Softmax(),
-            nn.Linear(hidden_dim, out_dim)
+            nn.ReLU(),
+            nn.Linear(hidden_dim, out_dim),
         )
 
     def forward(self, x):

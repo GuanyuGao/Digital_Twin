@@ -28,12 +28,12 @@ if __name__ == '__main__':
     args = argparser.parse_args()
 
     x, y = load_data()
-    print(x.shape)
+    # print(x.shape)
 
     train_x, train_y = get_set(x, y, "train")
     test_x, test_y = get_set(x, y, "test")
 
-    model = MixtureDensityNetwork(4, 1, args.hidden_dim, n_components=5)
+    model = MixtureDensityNetwork(4, 1, args.hidden_dim, n_components=3)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
 
     for i in range(args.n_iterations):
@@ -47,8 +47,8 @@ if __name__ == '__main__':
 
     torch.save(model.state_dict(), '../data/model100.pt')
 
-    pi, normal = model(x)
-    print(pi.sample())
+    logits, pi, normal = model(x)
+    # print(pi.sample())
     mean = normal.mean
     stddev = normal.stddev
 
