@@ -5,7 +5,7 @@ import torch
 
 
 def load_data():
-    data_file = os.path.join(os.path.dirname(__file__), "data.json")
+    data_file = os.path.join(os.path.dirname(__file__), "ALLdata.json")
     file = open(data_file, 'r', encoding='utf-8')
     for line in file.readlines():
         dict = json.loads(line)

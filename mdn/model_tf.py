@@ -74,8 +74,11 @@ def eval_mdn_model(x_test, y_test, mdn_model):
 
     y_pred = mdn_model.predict(x_test)
     alpha_pred, mu_pred, sigma_pred = slice_parameter_vectors(y_pred)
-    list = tf.losses.mean_squared_error(np.multiply(alpha_pred, mu_pred).sum(axis=-1)[:, np.newaxis], y_test).numpy()[0]
-    print("MDN-MSE: {:1.3f}".format(list))
+    acc = (np.multiply(alpha_pred, mu_pred).sum(axis=-1)[:, np.newaxis] - y_test) / y_test * 100
+    print("acc:" + str(acc))
+    list = tf.losses.mean_squared_error(np.multiply(alpha_pred, mu_pred).sum(axis=-1)[:, np.newaxis], y_test).numpy()
+
+    print("MDN-MSE: {:1.3f}".format(sum(list) / len(list)))
     # print("MDN-NLL: {:1.3f}\n".format(gnll_eval(y_test.astype(np.float32), alpha_pred, mu_pred, sigma_pred).numpy()[0]))
 
 
@@ -99,22 +102,22 @@ y = y.numpy().astype(np.float32)
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42,  shuffle=True)
 # Normalization
 x_min_max_scaler = MinMaxScaler()
-x_train = x_min_max_scaler.fit_transform(x)
-x_test = x_min_max_scaler.transform(x)
+x_train = x_min_max_scaler.fit_transform(x_train)
+x_test = x_min_max_scaler.transform(x_test)
 
 y_min_max_scaler = MinMaxScaler()
-y_train = y_min_max_scaler.fit_transform(y)
-y_test = y_min_max_scaler.transform(y)
+y_train = y_min_max_scaler.fit_transform(y_train)
+y_test = y_min_max_scaler.transform(y_test)
 
 
-opt = tf.optimizers.Adam(1e-7)
+opt = tf.optimizers.Adam(1e-4)
 tf.keras.utils.get_custom_objects().update({'nnelu': Activation(nnelu)})
 
 mdn_3 = MDN(neurons=neurons, components=components)
 mdn_3.compile(loss=gnll_loss, optimizer=opt)
 
 # train
-mdn_3.fit(x=x_train, y=y_train, epochs=10000, validation_data=(x_test, y_test), batch_size=512, verbose=1)  # callbacks=[mon],
+mdn_3.fit(x=x_train, y=y_train, epochs=1000, validation_data=(x_test, y_test), batch_size=512, verbose=1)  # callbacks=[mon],
 
 eval_mdn_model(x_test, y_test, mdn_3)
 # mdn_3.save_weights(r'save_weights.h5')
