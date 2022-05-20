@@ -61,7 +61,7 @@ function [log_vars, cycle_lifes] = varianceFeatureEveryCycle(whole_batch)
 %     fclose(fid);
 
     fid = fopen('ALLdata.json', 'w+');
-    battery_num = 40;
+    battery_num = 140;
     start = 1;
     log_vars = [];
     log_miniums = [];

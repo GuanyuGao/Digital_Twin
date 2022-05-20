@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow.keras import backend as K
 from data.load_data import load_data
 
+np.set_printoptions(threshold=np.inf)
 tf.random.set_seed(42)
 np.random.seed(42)
 
@@ -74,8 +75,10 @@ def eval_mdn_model(x_test, y_test, mdn_model):
 
     y_pred = mdn_model.predict(x_test)
     alpha_pred, mu_pred, sigma_pred = slice_parameter_vectors(y_pred)
-    acc = (np.multiply(alpha_pred, mu_pred).sum(axis=-1)[:, np.newaxis] - y_test) / y_test * 100
+    # print(len(y_test))
+    acc = sum(abs(np.multiply(alpha_pred, mu_pred).sum(axis=-1)[:, np.newaxis] - y_test) / y_test) / len(y_test) * 100
     print("acc:" + str(acc))
+
     list = tf.losses.mean_squared_error(np.multiply(alpha_pred, mu_pred).sum(axis=-1)[:, np.newaxis], y_test).numpy()
 
     print("MDN-MSE: {:1.3f}".format(sum(list) / len(list)))
@@ -100,16 +103,18 @@ x = x.numpy()
 y = y.numpy().astype(np.float32)
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42,  shuffle=True)
+
+
 # Normalization
-x_min_max_scaler = MinMaxScaler()
+x_min_max_scaler = MinMaxScaler(feature_range=[0.001, 1])
 x_train = x_min_max_scaler.fit_transform(x_train)
 x_test = x_min_max_scaler.transform(x_test)
 
-y_min_max_scaler = MinMaxScaler()
+y_min_max_scaler = MinMaxScaler(feature_range=[0.001, 1])
 y_train = y_min_max_scaler.fit_transform(y_train)
 y_test = y_min_max_scaler.transform(y_test)
-
-
+print(y_train)
+print(y_test)
 opt = tf.optimizers.Adam(1e-4)
 tf.keras.utils.get_custom_objects().update({'nnelu': Activation(nnelu)})
 
@@ -117,17 +122,15 @@ mdn_3 = MDN(neurons=neurons, components=components)
 mdn_3.compile(loss=gnll_loss, optimizer=opt)
 
 # train
-mdn_3.fit(x=x_train, y=y_train, epochs=1000, validation_data=(x_test, y_test), batch_size=512, verbose=1)  # callbacks=[mon],
+mdn_3.fit(x=x_train, y=y_train, epochs=10000, validation_data=(x_test, y_test), batch_size=64, verbose=1)  # callbacks=[mon],
 
 eval_mdn_model(x_test, y_test, mdn_3)
 # mdn_3.save_weights(r'save_weights.h5')
 # mdn_3.build((1, 4))
 
 # mdn_3.load_weights(r'save_weights.h5')
-result = mdn_3(x_test)
+result = mdn_3.predict(x_test)
 
-loss = mdn_3.evaluate(x_test, y_test)
-print(loss)
 print("-----------------")
 # print(acc)
 # print(result)
@@ -135,12 +138,17 @@ pi, mu, std = get_mixture_coef(result, Training=False)
 # print(pi)
 # print(mu)
 # print(std)
+cycle_number = 700
 
-i = 500
-
-prob = norm(mu[0][0], std[0][0] + 100).cdf(i) * pi[0][0] + \
-    norm(mu[0][1], std[0][1] + 100).cdf(i) * pi[0][1] + \
-    norm(mu[0][2], std[0][2] + 100).cdf(i) * pi[0][2]
-
-print(prob)
+cycle_numbers = []
+risks = []
+for i in range(cycle_number, cycle_number + 30 * 15, 30):
+    i = y_min_max_scaler.transform(np.int64(i).reshape(1, 1))
+    prob = norm(mu[0][0], std[0][0]).cdf(i) * pi[0][0] + \
+        norm(mu[0][1], std[0][1]).cdf(i) * pi[0][1] + \
+        norm(mu[0][2], std[0][2]).cdf(i) * pi[0][2]
+    cycle_numbers.append(i)
+    risks.append(prob)
+print(cycle_numbers)
+print(risks)
 
